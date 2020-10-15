@@ -18,7 +18,7 @@ fi
 
 if [ -f $webapps/docker-compose.yml ];then
 	sed -i "s/MYSQL_DATABASE:[[:space:]]*[a-zA-Z\.]*/MYSQL_DATABASE: $database/" $webapps/docker-compose.yml
-  sed -i "s/container_name:[[:space:]]*\${[a-zA-Z\.]*}-/container_name: $app-/g" $webapps/docker-compose.yml
+  #sed -i "s/container_name:[[:space:]]*\${[a-zA-Z\.]*}-/container_name: $app-/g" $webapps/docker-compose.yml
   sed -i "s/-[[:space:]]*[0-9]*:80/- $port:80/" $webapps/docker-compose.yml
 else
   echo docker-compose.yml not found!
@@ -26,7 +26,7 @@ fi
 
 if [ -f $webapps/docker-compose-greenfield.yml ];then
 	sed -i "s/MYSQL_DATABASE:[[:space:]]*[a-zA-Z\.]*/MYSQL_DATABASE: $database/" $webapps/docker-compose-greenfield.yml
-  sed -i "s/container_name:[[:space:]]*\${[a-zA-Z\.]*}-/container_name: $app-/g" $webapps/docker-compose-greenfield.yml
+  #sed -i "s/container_name:[[:space:]]*\${[a-zA-Z\.]*}-/container_name: $app-/g" $webapps/docker-compose-greenfield.yml
 else
   echo docker-compose-greenfield.yml not found!
 fi

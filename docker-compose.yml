@@ -1,49 +1,108 @@
 version: "3"
 services:
   # docker-compose -f docker-compose.yml up --detach --build  ## for recreating th
-
   api:
-    container_name: ${app}-api
-    image: 'zelejs/allin-web:jdk11'
+    image: zelejs/app-openjre11:latest
+    container_name: api
+    privileged: true
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./api:/webapps
+      - ./attachments:/attachments
     environment:
-      TZ: "Asia/Shanghai"
-      #GREENFIELD: 'run'
-
+      DL_STANDALONE: "gmic-cad-artifact-1.0.0-standalone.jar"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
   web:
-    container_name: ${app}-web
-    image: 'daocloud.io/library/nginx:latest'
+    image: daocloud.io/library/nginx:latest
+    container_name: web
+    privileged: true
+    restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./web/dist:/usr/share/nginx/html
-    environment:
-      TZ: "Asia/Shanghai"
-
-  nginx:
-    container_name: ${app}-nginx
-    image: 'daocloud.io/library/nginx:latest'
-    ports:
-      - 80:80
-      #- 443:443
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/logs:/var/log/nginx
-      - ./nginx/cert:/cert
-    environment:
-      TZ: "Asia/Shanghai"
-
-  mysqlserver:
-    container_name: ${app}-mysql
+      - ./web/conf.d:/etc/nginx/conf.d
+      - ./web/logs:/var/log/nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+  mysql:
+    container_name: mysql
     image: 'daocloud.io/library/mysql:5.7'
+    privileged: true
     restart: always
     environment:
       TZ: "Asia/Shanghai"
-      MYSQL_DATABASE: database
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: 'cinema'
+      MYSQL_ROOT_PASSWORD: 'rootAZaz@123'
     volumes:
       - ./mysql/data:/var/lib/mysql
-      - ./mysql/sql_mode.cnf:/etc/mysql/mysql.conf.d/sql_mode.cnf
-
-
+      - ./mysql/conf.d/sql_mode.cnf:/etc/mysql/conf.d/sql_mode.cnf
+      - ./mysql/conf.d/utf8.cnf:/etc/mysql/conf.d/utf8.cnf
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+  nginx:
+    container_name: nginx
+    image: 'daocloud.io/library/nginx:latest'
+    privileged: true
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/cert:/cert
+      - ./images:/images
+      - ./attachments:/usr/share/nginx/html/attachments
+    environment:
+      TZ: "Asia/Shanghai"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+  mysqlbackup:
+    image: zelejs/mysqlback:latest
+    container_name: mysqlbackup
+    privileged: true
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./mysqlbackup/data:/var/mysqlbackup/data
+      - ./mysqlbackup/log:/var/mysqlbackup/log
+    environment:
+      MYSQL_DB: cinema
+      TZ: Asia/Shanghai
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root 
+      MYSQL_USER_PASSWORD: rootAZaz!123
+      CRONTAB_DAILY_HOUR: 3
+      CRONTAB_DAILY_MIN: 25
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+  # redis:
+  #   container_name: redis
+  #   image: 'daocloud.io/library/redis:3.2.9'
+  #   environment:
+  #     TZ: "Asia/Shanghai"
+  #   ports:
+  #     - 6379:6379
+  #   volumes:
+  #     - ./redis/conf:/usr/local/etc/redis
+  #   command:
+  #     redis-server /usr/local/etc/redis/redis.conf
+  #datagear:
+  #  image: 'zelejs/datagear'
+  #  container_name: datagear
+  #  volumes:
+  #    - ./datagear/logs:/usr/local/tomcat/logs

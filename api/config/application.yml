@@ -10,8 +10,29 @@ spring:
     schema: classpath*:sql/*-schema.sql
     data: classpath*:sql/*-data.sql
     initialize: false
+  http:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
 
 logging:
-  level: debug
+  level: warn 
   config: config/logback-spring.xml
 
+io:
+  fileUploadPath: /attachments
+  fileHost: /attachments
+  excel-template-dir: "templates"
+
+aliyun:
+  sso:
+    endpoint: "http://oss-cn-shenzhen.aliyuncs.com"
+    accessKeyId: ""
+    accessKeySecret: ""
+    bucketName: ""
+    username: ""
+    thumbParam: "x-oss-process=image/resize,m_fill,h_750,w_750"
+    accessUrl: "http://xxxxxx.oss-cn-shenzhen.aliyuncs.com/"
+  sms:
+    accessKeyId: ""
+    accessKeySecret: ""
